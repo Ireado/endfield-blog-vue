@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN" data-ef-paper="warm">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RHINE 笔记 · 一个人的设计与工程笔记</title>
+    <meta name="description" content="界面、前端、渲染与声音的工作笔记。按发布顺序编号。" />
+    <script>
+      try {
+        const t = localStorage.getItem('theme')
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t
+      } catch (err) {}
+    </script>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/src/assets/fonts/Saira.woff2" as="font" type="font/woff2" crossorigin />
+    <meta name="theme-color" content="#F3F1EA" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1B1A17" media="(prefers-color-scheme: dark)" />
+    <script src="/variant.js"></script>
+  </head>
+  <body class="ef ef-contours">
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
