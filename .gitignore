@@ -12,6 +12,9 @@ dist/
 .env.*
 !.env.example
 
+# 本地走查截图（体积大、非源码，仅本机留档）
+screenshots/
+
 # 日志 / 系统 / 编辑器
 *.log
 npm-debug.log*
