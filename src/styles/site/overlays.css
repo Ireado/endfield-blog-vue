@@ -1,0 +1,279 @@
+/* overlays.css — 浮层：成就弹窗、搜索面板、通用 dialog/滚动区、关闭动画、toast */
+
+/* ---------- 通用 dialog 结构 ---------- */
+.ef-dialog.wide {
+  width: min(36rem, calc(100% - 2rem));
+}
+#ach-dialog > .ef-panel,
+#palette > .ef-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 3rem);
+}
+/* 弹窗自己只做容器：滚动交给内部列表，否则悬浮时会出现第二条系统滚动条 */
+.ef-dialog {
+  overflow: visible;
+  max-height: none;
+}
+.dialog-sub {
+  margin: 0.1rem 0 0.9rem;
+  color: var(--ef-ink-2);
+}
+
+/* ---------- 列表 + 自绘滚动条 ---------- */
+/* 系统条藏掉，换成 8px 方头条（轨道纸色、1px 细线、滑块线色） */
+.scroll-host {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0 0 1.1rem;
+}
+.scroll-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 12px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scroll-body::-webkit-scrollbar {
+  display: none;
+}
+.ef-sb {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 8px;
+  touch-action: none;
+}
+.ef-sb::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ef-paper);
+  border-left: 1px solid var(--ef-rule);
+  opacity: 0.85;
+  transition: opacity 0.15s var(--ef-ease);
+}
+.scroll-host:hover .ef-sb::before,
+.scroll-host.is-dragging .ef-sb::before {
+  opacity: 1;
+}
+.ef-sb > i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  /* 比细线重一档，才看得出来是滑块；悬停再加深 */
+  background: color-mix(in srgb, var(--ef-ink) 26%, var(--ef-paper));
+  cursor: grab;
+}
+.ef-sb > i:hover,
+.scroll-host.is-dragging .ef-sb > i {
+  background: var(--ef-ink-2);
+}
+.scroll-host.is-dragging .ef-sb > i {
+  cursor: grabbing;
+}
+.scroll-host:not(.is-scrollable) .ef-sb {
+  display: none;
+}
+
+/* ---------- 成就列表 ---------- */
+.ach-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ef-rule);
+}
+/* 列表还有内容时，底边渐隐，半行不会看起来像被裁坏 */
+.scroll-host.has-more .scroll-body {
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 18px), transparent);
+  mask-image: linear-gradient(#000 calc(100% - 18px), transparent);
+}
+.ach-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.15rem 0.7rem;
+  align-items: baseline;
+  padding: 0.5rem 0.15rem;
+  border-bottom: 1px solid var(--ef-rule);
+}
+.ach-list .no {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ef-ink-2);
+  font-stretch: var(--ef-wide);
+  font-variant-numeric: tabular-nums;
+}
+.ach-list .nm {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.ach-list .st {
+  font-size: 11px;
+  color: var(--ef-ink-2);
+  white-space: nowrap;
+}
+.ach-list .ds {
+  grid-column: 2 / -1;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ef-ink-2);
+}
+.ach-list li.is-got .no {
+  background: var(--ef-tag-bg);
+  color: var(--ef-tag-fg);
+  padding: 0 0.4em;
+}
+.ach-list li.is-got .st {
+  color: var(--ef-ink);
+}
+/* 未获得：整块信号黄 + 墨字，套件里「当前/需要注意」的语言（同 .ef-tag.is-current）。
+   黄只做填充、不做线；两个主题都是黄底墨字，不需要分支。 */
+.ach-list li:not(.is-got) .st {
+  background: var(--ef-signal);
+  color: var(--ef-on-signal);
+  padding: 0 0.45em;
+}
+.ach-list .bar {
+  grid-column: 1 / -1;
+  height: 3px;
+  margin-top: 0.45rem;
+  background: var(--ef-chip);
+}
+.ach-list .bar i {
+  display: block;
+  height: 100%;
+  width: var(--p, 0%);
+  background: var(--ef-trace);
+}
+
+/* ---------- 搜索面板 ---------- */
+.ef-dialog.palette {
+  width: min(34rem, calc(100% - 2rem));
+}
+.palette .ef-search {
+  margin: 0.85rem 0 0.6rem;
+  flex: none;
+}
+.palette #pal-list {
+  border-top: 1px solid var(--ef-rule);
+}
+.palette #pal-list li {
+  border-bottom: 1px solid var(--ef-rule);
+}
+.palette .ef-record {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 0.6rem 0.4rem;
+}
+.palette .ef-record .name {
+  font-size: 0.95rem;
+}
+.palette .ef-record[aria-current='true'] {
+  background: var(--ef-paper);
+}
+.palette .ef-record[aria-current='true']::before {
+  transform: none;
+}
+.palette .ef-record[aria-current='true'] > * {
+  transform: translateX(6px);
+}
+.palette-hint {
+  margin: 0;
+  color: var(--ef-ink-2);
+}
+
+/* ---------- 弹窗页脚 ---------- */
+/* 关闭按钮统一放右下角 */
+.dialog-foot {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.9rem;
+  flex: none;
+}
+.dialog-foot .palette-hint {
+  margin-right: auto;
+}
+.dialog-foot .ef-btn {
+  margin-left: auto;
+}
+
+/* ---------- 关闭动画 ---------- */
+/* 套件的 ef-shut 只写了 to，动画起点会被当成 none，
+   而 none → inset() 不能插值，于是前半段只淡出、后半段面板突然被裁空。
+   补一个和入场 ef-power 对称的 from（inset(-6px)），整段才是连续的收起。 */
+@media (prefers-reduced-motion: no-preference) {
+  .ef-dialog.is-closing > * {
+    animation-name: ef-shut-panel;
+  }
+}
+@keyframes ef-shut-panel {
+  from {
+    opacity: 1;
+    clip-path: inset(-6px);
+  }
+  to {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+/* ---------- toast ---------- */
+/* 顶层提示条：Popover 会进入 top layer，才能盖住 <dialog> */
+.toast-layer {
+  position: fixed;
+  inset: 0;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 400;
+}
+.toast-layer .ef-toast {
+  pointer-events: none;
+}
+
+/* ---------- 响应式：手机上弹窗收矮 ---------- */
+@media (max-width: 719px) {
+  /* 手机上不要在上下各留一条缝就占满屏幕 */
+  #palette > .ef-panel {
+    max-height: 62dvh;
+  }
+  #ach-dialog > .ef-panel {
+    max-height: 74dvh;
+  }
+  .dialog-foot {
+    margin-top: 0.6rem;
+  }
+}
+
+@media (max-width: 719px) {
+  /* 搜索面板每行保持单行：编号 / 标题 / 分类，别被通用记录行的两行规则拆开 */
+  .palette .ef-record {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: 0;
+  }
+  .palette .ef-record .name {
+    grid-column: auto;
+    grid-row: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* 手机上去掉分类列，保证每行单行，标题不被挤成两行 */
+  .palette .ef-record > .ef-field:last-child {
+    display: none;
+  }
+}

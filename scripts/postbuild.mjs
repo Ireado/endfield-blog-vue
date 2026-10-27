@@ -2,15 +2,19 @@
 import { copyFileSync, existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import matter from 'gray-matter'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const DIST = path.join(ROOT, 'dist')
 const site = JSON.parse(readFileSync(path.join(ROOT, 'content/site.json'), 'utf8'))
 const origin = (process.env.SITE_URL || 'http://localhost:4173').replace(/\/$/, '')
+// 与 content-plugin 同一条分流规则：frontmatter secret:true 的文章是独立页面（colophon），
+// 不进 sitemap、也不需要旧地址跳转。这里不要按编号写特判。
 const posts = readdirSync(path.join(ROOT, 'content/posts'))
   .filter((f) => f.endsWith('.md'))
-  .map((f) => f.slice(0, 3))
-  .filter((no) => no !== '000')
+  .map((f) => matter(readFileSync(path.join(ROOT, 'content/posts', f), 'utf8')).data)
+  .filter((data) => !data.secret)
+  .map((data) => String(data.no))
 
 // 404.html —— 交给静态托管
 const notFound = path.join(DIST, '404/index.html')

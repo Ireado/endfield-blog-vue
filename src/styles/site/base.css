@@ -1,0 +1,48 @@
+/* base.css — 全局地基：字体、变量、模态滚动锁、数字等宽、kbd */
+
+@font-face {
+  font-family: 'Saira';
+  /* 只留 woff2：现代浏览器全覆盖，truetype 兜底只服务化石浏览器，不值 483KB */
+  src: url('../../assets/fonts/Saira.woff2') format('woff2');
+  font-weight: 100 900;
+  font-stretch: 50% 125%;
+  /* block：宁可晚一帧出现，也不要在首帧用系统字体再跳成 Saira */
+  font-display: block;
+}
+
+:root {
+  --ef-font-ui: 'Saira', 'Noto Sans SC', 'Source Han Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --ef-font-text: 'Noto Sans SC', 'Source Han Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --site-rail: 12rem;
+}
+
+/* 模态打开：页面滚动条收起，只留弹窗自己的滚动。
+   经典滚动条环境用 --sbw 补偿宽度，覆盖式滚动条下 --sbw 为 0。 */
+html.modal-open {
+  overflow: hidden;
+}
+html.modal-open body {
+  padding-right: var(--sbw, 0px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* 宽体字体里的数字默认是比例字形：111 比 888 窄四成。
+   编号、日期、计数、乱码落定都必须等宽，否则会推着旁边的文字来回跳。 */
+.ef-field,
+.ef-hollow-no,
+.rail-tools .ef-btn .sub,
+.ach-list .no {
+  font-variant-numeric: tabular-nums;
+}
+
+kbd {
+  font-family: var(--ef-font-ui);
+  font-size: 0.82em;
+  font-weight: 600;
+  padding: 0.05em 0.35em;
+  border: 1px solid var(--ef-rule);
+  background: var(--ef-panel);
+}

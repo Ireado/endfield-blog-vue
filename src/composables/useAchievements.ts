@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue'
+import { secret, stats } from 'virtual:blog'
 import { toast } from './useToast'
 import { play } from './useSound'
 
@@ -17,7 +18,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'archivist', no: '03', name: '全部读完', desc: '读过全部七篇文章。' },
   { id: 'deepscan', no: '04', name: '深度阅读', desc: '一篇文章读到 80%。' },
   { id: 'skimmer', no: '05', name: '匆匆一瞥', desc: '打开一篇，五秒内就离开。' },
-  { id: 'secret', no: '06', name: '目录之外', desc: '找到隐藏的 No.000。', secret: true, hint: '线索：页脚最右下角那串编号。' },
+  { id: 'secret', no: '06', name: '目录之外', desc: `找到隐藏的 No.${secret.no}。`, secret: true, hint: '线索：页脚最右下角那串编号。' },
   { id: 'night', no: '07', name: '深夜', desc: '在 00:00 到 05:00 之间来访。' },
   { id: 'early', no: '08', name: '清晨', desc: '在 05:00 到 07:00 之间来访。' },
   { id: 'silence', no: '09', name: '静音', desc: '关掉音效。' },
@@ -105,10 +106,11 @@ export function useAchievements() {
         persist()
       }
       unlock('reader')
-      if (read.value.filter(n => n !== '000').length >= 7) unlock('archivist')
+      /* archivist：读完全部正式文章。数量与隐藏档案编号都取自内容数据，不写死。 */
+      if (read.value.filter(n => n !== secret.no).length >= stats.count) unlock('archivist')
     } else if (to.name === 'colophon') {
       enteredAt.value = Date.now()
-      store.lastPost = { no: '000', ts: Date.now() }
+      store.lastPost = { no: secret.no, ts: Date.now() }
       persist()
       unlock('secret')
     } else if (to.name === 'not-found') {

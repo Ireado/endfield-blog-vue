@@ -1,0 +1,165 @@
+/* post.css — 文章页：标题、正文、代码块、侧栏目录，及它们的响应式 */
+
+/* ---------- 标题与事实 ---------- */
+.post .title {
+  margin: 1.4rem 0 1rem;
+  font-size: clamp(var(--ef-t-title), 4.6vw, var(--ef-t-h1));
+  font-weight: 700;
+  line-height: 1.28;
+  max-width: var(--ef-measure);
+}
+.ef-prose h2[id] {
+  scroll-margin-top: 24px;
+}
+.post .ef-tri {
+  margin-bottom: 1.4rem;
+}
+.ef-lede {
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  color: var(--ef-ink-2);
+  max-width: var(--ef-measure);
+  margin: 0;
+}
+
+/* ---------- 正文 ---------- */
+.ef-prose {
+  margin-top: 2.2rem;
+}
+.ef-prose > :first-child {
+  margin-top: 0;
+}
+.ef-prose ul,
+.ef-prose ol {
+  margin: 0 0 1.3em;
+  padding-left: 1.35em;
+}
+.ef-prose li {
+  margin-bottom: 0.35em;
+}
+.ef-prose li::marker {
+  color: var(--ef-ink-2);
+}
+.ef-prose p code,
+.ef-prose li code {
+  white-space: nowrap;
+}
+.ef-prose .ef-notice {
+  margin: 1.6em 0;
+  font-size: 0.98rem;
+  line-height: 1.8;
+}
+.ef-prose h2 + p,
+.ef-prose h2 + ul,
+.ef-prose h2 + ol {
+  margin-top: 0;
+}
+
+/* ---------- 代码块 ---------- */
+.code {
+  position: relative;
+  margin: 1.5em 0;
+  border: 1px solid var(--ef-rule);
+  background: var(--ef-panel);
+  overflow: auto;
+}
+.code pre {
+  margin: 0;
+  padding: 1.1rem 1rem 1.15rem;
+}
+.code code {
+  display: block;
+  border: 0;
+  background: none;
+  padding: 0;
+  font-size: 0.8rem;
+  line-height: 1.75;
+  white-space: pre;
+  color: var(--ef-ink);
+}
+.code-lang {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin: 0 0 -1.6em;
+  padding: 0.1em 0.55em;
+  background: var(--ef-chip);
+  color: var(--ef-ink-2);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.post-end {
+  margin: 2.5rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ef-rule);
+  color: var(--ef-ink-2);
+}
+
+/* ---------- 侧栏目录 ---------- */
+.toc-wrap {
+  position: sticky;
+  /* 和 .ef-margin 的上内边距同值：目录在起始位置就是粘住的状态，滚动时不再移动 */
+  top: clamp(2rem, 5vw, 3.5rem);
+}
+.toc-h {
+  margin: 0 0 0.6rem;
+  color: var(--ef-ink-2);
+}
+.toc {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-left: 1px solid var(--ef-rule);
+}
+.toc a {
+  display: block;
+  margin-left: -1px;
+  padding: 0.3rem 0 0.3rem 0.9rem;
+  border-left: 3px solid transparent;
+  color: var(--ef-ink-2);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.toc a:hover {
+  color: var(--ef-ink);
+}
+.toc a[aria-current='true'] {
+  color: var(--ef-ink);
+  border-left-color: var(--ef-trace);
+}
+.read-line {
+  margin: 1rem 0 0;
+  color: var(--ef-ink-2);
+}
+.read-line b {
+  color: var(--ef-ink);
+  font-variant-numeric: tabular-nums;
+}
+.margin-h {
+  margin: 2.25rem 0 0.5rem;
+  color: var(--ef-ink-2);
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 959px) {
+  /* 单栏时目录在正文之后，不需要粘性定位 */
+  .toc-wrap {
+    position: static;
+  }
+}
+
+@media (max-width: 719px) {
+  .post .title {
+    font-size: clamp(1.5rem, 7vw, 2rem);
+  }
+  .code-lang {
+    float: none;
+    display: block;
+    margin: 0;
+  }
+  .code pre {
+    padding-top: 0.6rem;
+  }
+}

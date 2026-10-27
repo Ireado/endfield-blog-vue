@@ -1,0 +1,32 @@
+/* pages.css — 关于页与 404 页 */
+
+/* ---------- 关于 ---------- */
+.ef-prose.h-about {
+  max-width: var(--ef-measure);
+}
+.ef-sheet > .ef-ledger {
+  max-width: var(--ef-measure);
+}
+
+/* ---------- 404 ---------- */
+.alone {
+  justify-content: flex-start;
+}
+.notfound {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: clamp(3rem, 10vh, 8rem) var(--ef-pad) 3rem;
+  max-width: 40rem;
+}
+.notfound h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+.notfound .ef-actions {
+  margin-top: 1.5rem;
+}

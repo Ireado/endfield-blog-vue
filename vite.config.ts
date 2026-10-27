@@ -1,15 +1,11 @@
-import { readdirSync } from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, type UserConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import type { ViteSSGOptions } from 'vite-ssg'
-import { blogContent } from './scripts/content-plugin'
+import { blogContent, blogRoutes } from './scripts/content-plugin'
 
-const postRoutes = readdirSync('content/posts')
-  .filter(f => f.endsWith('.md'))
-  .map(f => f.slice(0, 3))
-  .filter(no => no !== '000')
-  .map(no => `/post/${no}/`)
+// 内容路由由 content-plugin 统一推导（frontmatter secret 分流），这里不做编号特判
+const { postRoutes, secretRoute } = blogRoutes()
 
 export default defineConfig({
   plugins: [vue(), blogContent()],
@@ -18,6 +14,6 @@ export default defineConfig({
   },
   ssgOptions: {
     dirStyle: 'nested',
-    includedRoutes: () => ['/', '/articles/', '/about/', '/404/', '/colophon/', ...postRoutes],
+    includedRoutes: () => ['/', '/articles/', '/about/', '/404/', secretRoute, ...postRoutes],
   },
 } as UserConfig & { ssgOptions: ViteSSGOptions })

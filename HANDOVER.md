@@ -80,8 +80,11 @@ endfield-blog-vue/
 │  │  ├─ home/ArtFrame.vue    # 工作台俯视线稿（内联 SVG）
 │  │  └─ ui/                  # RecordRow、ScrollArea、SearchPalette、AchievementDialog、ToastHost
 │  ├─ composables/            # theme / sound / achievements / reading / scroll lock / scramble / toast / ui / dialogClose
-│  ├─ styles/{endfield.css, site.css, contours/}
-│  └─ assets/fonts/           # Saira.woff2（81 KB）+ ttf 回退 + OFL
+│  ├─ styles/{endfield.css, site.css, site/, contours/}
+│  │  # site.css 是 @import 入口（顺序=层叠顺序）；site/ 按模块拆分：
+│  │  # base 全局地基 / scrollbar 页面滚动条 / shell 骨架·左栏·页脚 /
+│  │  # home 首页 / articles 列表 / post 文章页 / pages 关于·404 / overlays 浮层
+│  └─ assets/fonts/           # Saira.woff2（81 KB）+ OFL（ttf 回退已移除）
 └─ screenshots/
 ```
 
@@ -129,11 +132,11 @@ secret: false
 
 ### 4.2 隐藏档案
 
-`content/posts/000-colophon.md` 的 `secret: true`。它不会进入文章列表/首页/ticker，但会生成 `/colophon/`，页脚 `No.000` 是唯一入口；该页自动带 `noindex`。
+`content/posts/000-colophon.md` 的 `secret: true`。它不会进入文章列表/首页/ticker，但会生成 `/colophon/`（URL 由文件名 slug 推导，SSG 路由、sitemap、路由表、页脚入口全部同源，见 `content-plugin.ts` 的 `blogRoutes()` 与 `loadBlog()`，**不要在任何下游按编号 `000` 写特判**）；页脚 `No.000` 是唯一入口；该页自动带 `noindex`。以后要加第二个隐藏页：新建 `NNN-slug.md` + `secret: true` 即可，路由与入口自动生成。
 
 ### 4.3 站点信息
 
-`content/site.json`：`name / zh / tagline / launch / updated / secretNo`。
+`content/site.json`：`name / zh / tagline / launch / updated`。
 发布内容后记得把 `updated` 改成当天，否则页脚、sitemap、首页“第 N 天”都不会变。
 
 ---
@@ -157,7 +160,7 @@ secret: false
 
 `endfield.css` 视为第三方套件：需要改视觉时优先在 `site.css` 覆盖；若必须改套件，记录改动并注意未来同步技能更新。
 
-字体：`Saira.woff2` 是从 `Saira.ttf` 子集化的（wght 100–900、wdth 50–125、tnum）。替换字体时必须保留可变宽度轴和 `tnum`，否则字标宽度与数字等宽都会坏。
+字体：`Saira.woff2` 是从原始 `Saira.ttf` 子集化的（wght 100–900、wdth 50–125、tnum）；ttf 兜底格式已删（现代浏览器全覆盖 woff2，不值得为其多背 483 KB）。替换字体时必须保留可变宽度轴和 `tnum`，否则字标宽度与数字等宽都会坏。
 
 ---
 
@@ -167,6 +170,7 @@ secret: false
 
 - 虚拟模块 `virtual:blog` 导出 `site / posts / secret / stats`。
 - Markdown 渲染：`:::note 标题` → `.ef-notice`；代码围栏 → `.code` 结构；h2 自动加 `id="s1..."` 并收集目录。
+- **路由单一数据源**：`blogRoutes()` 导出 `{ postRoutes, secretRoute }`——frontmatter `secret: true` 的文章走 `/<slug>/` 独立页（不进文章索引、不进 sitemap），其余走 `/post/<no>/`。`vite.config.ts`（SSG 路由）、`postbuild.mjs`（旧地址跳转 + sitemap，用 gray-matter 读同一份 frontmatter）、`router.ts`（`/${secret.slug}/`）全部由此推导。隐藏档案相关代码一律读 `secret.no / secret.slug`，**不要写字面量 `'000'`**。
 - 开发时监听 `content/posts` 与 `site.json`，改动后整页刷新（`handleHotUpdate`）。
 - 统计在构建期完成，客户端只拿到 HTML 字符串，不打包 markdown-it。
 

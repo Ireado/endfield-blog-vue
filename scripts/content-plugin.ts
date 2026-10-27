@@ -140,6 +140,21 @@ function loadBlog(): BlogData {
   }
 }
 
+/* 构建侧路由出口：frontmatter secret:true 的文章走独立页面 /<slug>/（不进文章索引），
+   其余走 /post/<no>/。vite.config 的 SSG 路由与 sitemap 一律从这里取，
+   不要在下游再按编号（如 '000'）写特判。 */
+export function blogRoutes() {
+  const files = readdirSync(POSTS_DIR).filter(f => f.endsWith('.md')).sort()
+  const postRoutes: string[] = []
+  let secretRoute = ''
+  for (const f of files) {
+    const { data } = matter(readFileSync(`${POSTS_DIR}/${f}`, 'utf8'))
+    if (data.secret) secretRoute = `/${slugOf(f)}/`
+    else postRoutes.push(`/post/${String(data.no)}/`)
+  }
+  return { postRoutes, secretRoute }
+}
+
 export function blogContent(): Plugin {
   return {
     name: 'endfield-blog-content',

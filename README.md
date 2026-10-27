@@ -27,7 +27,7 @@ src/
     home/           # 首页部件（线稿、字标区）
     ui/             # 记录行、弹窗内滚动条、搜索面板、成就面板、提示条
   composables/      # 主题、音效、成就、阅读进度、滚动锁、乱码、弹窗关闭
-  styles/           # endfield.css（套件，不改）+ site.css（版式）
+  styles/           # endfield.css（套件，不改）+ site.css（入口）+ site/（版式分模块）
   router.ts         # 路由与滚动行为
   page-transition.ts # 路由切换的斜切快门（View Transition）
 scripts/

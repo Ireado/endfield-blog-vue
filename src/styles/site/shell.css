@@ -1,0 +1,169 @@
+/* shell.css — 页面骨架、左栏（RailNav）、页脚，及它们的响应式 */
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--site-rail) minmax(0, 1fr);
+  min-height: 100dvh;
+}
+.main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  /* 不要被网格拉伸成"不含页脚"的高度，否则页脚溢出、粘性侧栏在底部被顶起 */
+  align-self: start;
+  min-height: 100dvh;
+}
+
+/* 三色条浮在视口顶部、不占布局；滚动时从右往左擦除，侧栏不会被顶下 3px */
+.ef-tri {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 70;
+  clip-path: inset(0 calc(var(--tri-wipe, 0) * 100%) 0 0);
+}
+
+/* ---------- 左栏 ---------- */
+/* overflow-y:auto 会把另一轴也变成 auto：按钮悬停时的亮边扫出按钮右缘，
+   就会在栏底撑出一条横向滚动条，进而改变列宽、让 hover 反复进出。
+   横向一律裁掉，只保留纵向滚动。 */
+.rail {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  gap: 0.05rem;
+}
+@supports (overflow: clip) {
+  .rail {
+    overflow-x: clip;
+  }
+}
+.rail .brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  padding-bottom: 1.75rem;
+}
+.rail .brand-zh {
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--ef-ink-2);
+  font-stretch: var(--ef-wider);
+}
+.rail-links {
+  display: flex;
+  flex-direction: column;
+}
+.rail-links a {
+  padding-block: 0.45rem;
+}
+/* 当前项是整块黄，字必须是 --ef-on-signal（墨）。
+   套件的 a:not(.brand):hover 特异性比 a[aria-current] 高，hover 时会把字换成
+   --ef-ink —— 深色下那是 #ededed，就成了黄底白字（1.04:1）。
+   这里把当前项的字色钉回去，两个主题统一。 */
+.ef-rail a[aria-current],
+.ef-rail a[aria-current]:hover {
+  color: var(--ef-on-signal);
+}
+.rail-tools {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.4rem;
+  padding: 1.25rem 1.25rem 0;
+}
+.rail-tools .ef-btn {
+  justify-content: flex-start;
+  width: 100%;
+}
+.rail-tools .ef-btn .sub {
+  margin-left: auto;
+  letter-spacing: 0.06em;
+}
+.rail-foot {
+  margin: 0;
+  padding: 0.9rem 1.25rem 0;
+  font-size: 11px;
+  color: var(--ef-ink-2);
+}
+
+/* ---------- 页脚 ---------- */
+.site-foot {
+  margin-top: auto;
+  padding: 1.5rem var(--ef-pad);
+  border-top: 1px solid var(--ef-rule);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 2rem;
+  justify-content: space-between;
+  color: var(--ef-ink-2);
+}
+.site-foot p {
+  margin: 0;
+}
+.secret-no {
+  color: var(--ef-ink-2);
+  border-bottom: 1px dashed currentColor;
+  text-underline-offset: 0.2em;
+}
+.secret-no:hover {
+  color: var(--ef-ink);
+}
+
+/* ---------- 响应式：单栏收起左栏 ---------- */
+@media (max-width: 1099px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rail {
+    position: static;
+    height: auto;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    border-right: 0;
+    border-bottom: 1px solid var(--ef-rule);
+    padding: 0.85rem var(--ef-pad) 0.8rem;
+    gap: 0;
+  }
+  .rail .brand {
+    padding: 0 0 0.4rem;
+  }
+  .rail-links {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0 1.4rem;
+  }
+  .rail-links a {
+    padding: 0.3rem 0;
+  }
+  .rail-tools {
+    margin-top: 0.55rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    padding: 0;
+  }
+  .rail-tools .ef-btn {
+    width: auto;
+  }
+  .rail-foot {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .rail-links {
+    gap: 0 1rem;
+  }
+  /* 只收起快捷键提示，成就计数要留着 */
+  .rail-tools [data-palette-open] .sub {
+    display: none;
+  }
+}

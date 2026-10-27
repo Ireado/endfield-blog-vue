@@ -4,7 +4,6 @@ export interface SiteInfo {
   tagline: string
   launch: string
   updated: string
-  secretNo: string
 }
 
 export interface Heading {

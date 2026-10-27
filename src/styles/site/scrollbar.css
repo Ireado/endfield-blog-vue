@@ -1,0 +1,81 @@
+/* scrollbar.css — 页面滚动条：原生条移除 + PageScrollbar 自绘条 */
+
+/* 原生条彻底移除，连占位也不要（Chrome 156 已不吃 ::-webkit-scrollbar 定制，
+   标准属性 scrollbar-width 才管用）。
+   不要用 scrollbar-color: transparent 保留占位：弹窗打开时 html 会 overflow:hidden，
+   那个占位跟着消失，视口宽度一变，fixed 的三色条和居中的 dialog 就会横跳十几像素。
+   占位拿掉后 clientWidth 恒等于 innerWidth，开关弹窗不改变任何宽度。
+   可见的那根由 PageScrollbar.vue 画，视觉同弹窗内的 ScrollArea。 */
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+/* Safari 等仍走 webkit 伪元素的浏览器 */
+html::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.page-sb {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 8px;
+  z-index: 60;
+  touch-action: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s var(--ef-ease);
+}
+.page-sb.is-on {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* 弹窗打开时页面锁住，这条也收起 */
+html.modal-open .page-sb {
+  opacity: 0;
+  pointer-events: none;
+}
+.page-sb::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ef-paper);
+  border-left: 1px solid var(--ef-rule);
+  opacity: 0.85;
+  transition: opacity 0.15s var(--ef-ease);
+}
+.page-sb:hover::before,
+.page-sb.is-dragging::before {
+  opacity: 1;
+}
+.page-sb > i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  /* 比细线重一档，才看得出来是滑块；悬停再加深 */
+  background: color-mix(in srgb, var(--ef-ink) 26%, var(--ef-paper));
+  cursor: grab;
+}
+.page-sb > i:hover,
+.page-sb.is-dragging > i {
+  background: var(--ef-ink-2);
+}
+.page-sb.is-dragging > i {
+  cursor: grabbing;
+}
+/* 触屏没有滚动条这回事 */
+@media (pointer: coarse) {
+  .page-sb {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-sb,
+  .page-sb::before {
+    transition: none;
+  }
+}
