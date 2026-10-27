@@ -1,15 +1,15 @@
 # HANDOVER · RHINE 笔记（Vue 3 静态博客）
 
-更新：2026-10-24（第二版：弹窗页脚 / 手机高度 / 提示条层级）· 当前版本：`endfield-blog-vue/` · 旧版：`../endfield-blog/`
+更新：2026-10-27（旧静态版移除 / 弹窗关闭动画 / 页面自绘滚动条）· 版本：`endfield-blog-vue/`
 
 ---
 
 ## 0. 先看这 9 条
 
-1. **只改 `endfield-blog-vue/`**。旧版 `endfield-blog/` 是纯 HTML 生成版，仅作回滚对照；换页快门是它原本就有的跨文档效果，但后来的三色条、滚动稳定、目录对齐等修复**没有同步**过去。
+1. **站点只有一个目录：`endfield-blog-vue/`**。旧的纯 HTML 版已于 2026-10-27 移除，别再去找 `../endfield-blog/`（唯一备份是 `../.workbuddy/archive/endfield-blog-legacy-2026-10-27.tar.gz`，不在本仓库里）。
 2. 构建是 **SSG**：`npm run build` 生成 12 个 prerender 页面 + `404.html` + 旧地址跳转桩 + sitemap/robots。产物在 `dist/`。
 3. 站点**不能双击 `file://` 打开**：ES module + 带 hash 的资源，必须用静态服务器。`npm run preview` 后访问 **`http://localhost:4173`**（本机 vite preview 只监听 `::1`，`127.0.0.1` 会 502）。
-4. 视觉规则来自 `endfield-ui` 技能：**浅色纸面、墨线、唯一黄色只做填充**。不要把这里改回黑底霓虹/HUD。
+4. 视觉规则来自 [`endfield-ui`](https://github.com/hhikr/endfield-ui-skill) 技能（仓库 <https://github.com/hhikr/endfield-ui-skill>）：**浅色纸面、墨线、唯一黄色只做填充**。不要把这里改回黑底霓虹/HUD。
 5. 换页的斜切快门不在 CSS 里自动生效，靠 `src/page-transition.ts` 手动 `startViewTransition`。
 6. 右侧目录的 sticky 起点必须与栏的上边距同值（`clamp(2rem,5vw,3.5rem)`），否则滚动前 24px 会漂移。
 7. 数字凡是会变（乱码、计数、日期），**必须 `font-variant-numeric: tabular-nums`**，否则会把旁边文字推来推去。
@@ -22,15 +22,14 @@
 
 | 项目 | 路径 | 说明 |
 | --- | --- | --- |
-| 当前版本 | `endfield-blog-vue/` | Vue 3 + Vite + vite-ssg，所有维护在这里 |
-| 旧版 | `endfield-blog/` | 纯 HTML，由 `tools/build.mjs` 从 `tools/content.mjs` 生成，保留作回滚 |
-| 设计套件 | `C:\Users\Iread\.workbuddy\skills\endfield-ui` | `src/styles/endfield.css` 原样取自该技能 |
-| 截图 | `endfield-blog-vue/screenshots/` | 13 张：浅/深、列表、文章、关于、404、搜索/成就（桌面 + 手机）、提示条压弹窗、移动端 |
+| 站点 | `endfield-blog-vue/` | Vue 3 + Vite + vite-ssg，全部代码在这里 |
+| 设计套件 | [endfield-ui](https://github.com/hhikr/endfield-ui-skill) | 终末地风格 UI 套件，仓库 <https://github.com/hhikr/endfield-ui-skill>，本地装在 `~/.workbuddy/skills/endfield-ui`；`src/styles/endfield.css` 是其 `assets/endfield.css` 的原样副本 |
+| 截图 | `endfield-blog-vue/screenshots/` | 本地留档、不进仓库（已 gitignore）。13 张：浅/深、列表、文章、关于、404、搜索/成就（桌面 + 手机）、提示条压弹窗、移动端 |
 
 **规模**：`dist/` 约 1.2 MB（含字体 81 KB）；`node_modules/` 约 113 MB。
 **当前没有常驻预览服务**：按第 2 节命令自行启动。
 **后端**：无。无统计脚本、无 Cookie、无第三方请求。状态全部在浏览器 localStorage。
-**版本控制**：当前目录没有初始化 git，只有 `.gitignore`（`node_modules`、`dist`、`.vite-ssg-temp`）。
+**版本控制**：本目录就是仓库根（`git init -b main`），直接在 `endfield-blog-vue/` 里执行 git 命令即可；`screenshots/` 与 `node_modules/`、`dist/` 均在 `.gitignore` 里，不进仓库。旧静态版不在本仓库历史中。
 
 ---
 
@@ -69,8 +68,7 @@ endfield-blog-vue/
 │  └─ site.json               # 站名、上线日、更新日
 ├─ scripts/
 │  ├─ content-plugin.ts       # 虚拟模块 virtual:blog：渲染 Markdown + 构建期统计
-│  ├─ postbuild.mjs           # 404.html、7 个旧地址跳转桩、sitemap、robots
-│  └─ migrate-content.mjs     # 一次性：旧 content.mjs → Markdown（不要在生产流程跑）
+│  └─ postbuild.mjs           # 404.html、7 个旧地址跳转桩、sitemap、robots
 ├─ src/
 │  ├─ main.ts                 # ViteSSG + 安装换页转场
 │  ├─ App.vue                 # 骨架、路由钩子、三色条擦除、滚动锁、快捷键、音效
@@ -78,10 +76,10 @@ endfield-blog-vue/
 │  ├─ page-transition.ts      # 换页斜切快门（startViewTransition）
 │  ├─ views/                  # Home / Articles / Article / About / NotFound
 │  ├─ components/
-│  │  ├─ shell/               # RailNav、SiteFooter
+│  │  ├─ shell/               # RailNav、SiteFooter、PageScrollbar（页面自绘滚动条）
 │  │  ├─ home/ArtFrame.vue    # 工作台俯视线稿（内联 SVG）
 │  │  └─ ui/                  # RecordRow、ScrollArea、SearchPalette、AchievementDialog、ToastHost
-│  ├─ composables/            # theme / sound / achievements / reading / scroll lock / scramble / toast / ui
+│  ├─ composables/            # theme / sound / achievements / reading / scroll lock / scramble / toast / ui / dialogClose
 │  ├─ styles/{endfield.css, site.css, contours/}
 │  └─ assets/fonts/           # Saira.woff2（81 KB）+ ttf 回退 + OFL
 └─ screenshots/
@@ -138,15 +136,13 @@ secret: false
 `content/site.json`：`name / zh / tagline / launch / updated / secretNo`。
 发布内容后记得把 `updated` 改成当天，否则页脚、sitemap、首页“第 N 天”都不会变。
 
-### 4.4 迁移脚本
-
-`scripts/migrate-content.mjs` 只用于从旧 `content.mjs` 生成 Markdown；它 import 了 `../endfield-blog/tools/content.mjs`，日常构建不要跑。
-
 ---
 
 ## 5. 设计系统（不可随意改的部分）
 
-变体：**标准**（yellow / warm / standard / contours / standard / full）。
+套件来自 [`endfield-ui`](https://github.com/hhikr/endfield-ui-skill) —— 终末地风格 UI 技能，仓库 <https://github.com/hhikr/endfield-ui-skill>，本地装在 `~/.workbuddy/skills/endfield-ui`。`src/styles/endfield.css` 是该技能 `assets/endfield.css` 的原样副本。
+
+变体：**标准**（yellow / warm / standard / contours / standard / full），落在 `<html data-ef-paper="warm">` 与 `<body class="ef ef-contours">` 上。
 主视觉：RHINE 字标 + 自绘工作台俯视线稿。页面类型：首页展示，其余阅读。
 
 **固定规则**：
@@ -247,6 +243,20 @@ secret: false
 - 能力检测 `'showPopover' in HTMLElement.prototype`；不支持时退化成普通 fixed 容器（会被 dialog 盖住，可接受）。
 - 以后加任何全局浮层（快捷键提示、引导、通知）先问一句：它需要出现在 `<dialog>` 之上吗？需要就用 Popover，不要试图调 `z-index`。
 
+### 6.12 弹窗关闭动画（`useDialogClose.ts`）
+
+- 套件自带退出动画：`.ef-dialog.is-closing > *` 跑 ef-shut 180ms（入场 ef-power 280ms，退出正好 2/3）。但原生 `close()` 是瞬时的，必须由 JS 先挂 `.is-closing`、等动画播完再关。
+- `useDialogClose()` 给 `close(el)` / `cancel(el)`：延迟 180ms 后 `close()`；动画途中又被打开时用 `cancel()` 撤掉待关闭状态。`prefers-reduced-motion` 下直接关，不留空等。
+- 两个弹窗模板都加了 `@cancel.prevent`，否则 Esc 会走原生关闭、绕过动画。
+- **套件的 `ef-shut` 只写了 `to`**：动画起点被当成 `none`，而 `none → inset()` 不能插值，前半段只淡出、后半段面板突然被裁空。`site.css` 补了 `@keyframes ef-shut-panel`（`from` 用 `inset(-6px)`，与 ef-power 严格互逆），用 `animation-name` 覆盖。
+
+### 6.13 页面滚动条（`PageScrollbar.vue`）
+
+- 原生条用 `html { scrollbar-width: none }` 彻底移除，**连占位一起拿掉**（Chrome 156 已不吃 `::-webkit-scrollbar` 定制）。
+- **不要用 `scrollbar-color: transparent` 保留占位**：弹窗打开时 `html{overflow:hidden}` 会让占位消失，视口宽 1425 → 1440，`.ef-tri` 跟着跳 15px、居中 dialog 横移 7.5px；而关闭动画正好发生在 modal-open 撤销的那一刻，于是在动画中途抖。`body{padding-right:var(--sbw)}` 补不了 `position: fixed` 的元素。
+- `PageScrollbar` 固定在右侧 8px，视觉同 `ScrollArea`（纸色轨道 + 1px 线 + 墨色滑块）；支持拖动滑块与点轨道跳转，`ResizeObserver` 盯 body 高度。
+- 不可滚动时不出 `is-on`；`html.modal-open` 时 CSS 收起；`@media (pointer: coarse)` 整条 `display: none`。
+
 ---
 
 ## 7. 踩坑清单（按主题）
@@ -268,6 +278,7 @@ secret: false
 | 手机弹窗几乎顶满整屏、四边只剩缝隙 | 桌面限高 `calc(100dvh - 3rem)`，到手机上就是“视口减 24px” | `≤719px` 单独给 `62dvh`（搜索）/ `74dvh`（成就） |
 | 弹窗列表撑破面板、关闭按钮跑到屏幕外 | 面板与 `ScrollArea` 之间多包了一层 div：`flex:0 1 auto` 又没有 `min-height:0`，高度按内容算 | 删掉包裹层，事件挂到 `ScrollArea`，列表直接做面板的 flex 子项 |
 | 手机搜索列表每行被拆成两行 | 套件 `≤719px` 的记录行规则让标题跨两列 | `.palette .ef-record` 强制单行 + 隐藏分类列 + 标题 ellipsis |
+| 开关弹窗时三色条变宽、居中弹窗横跳 | 原生滚动条占位在 `overflow:hidden` 时消失，视口宽 1425→1440 | `scrollbar-width:none` 连占位一起移除；`body` 的 padding 补偿救不了 fixed 元素 |
 
 ### 7.2 Vue / SSG
 
@@ -294,6 +305,7 @@ secret: false
 | 转场中再点主题会冲突 | 两个 View Transition 同时进行 | 目前 Chrome 能处理；套件 `.ef-theming` 会禁用 root 动画，如需严格可加全局 busy 锁 |
 | 切主题时滚动横幅停住 | View Transition 快照冻结 CSS 动画 | 已知取舍：保留圆形揭幕就有 ~300ms 停顿；若要求连续滚动则改 `wireTheme({reveal:false})` |
 | 时间/计数变化时布局抖 | 数字宽度变化 | tabular-nums + 固定容器宽度 |
+| 关闭弹窗时面板先淡出、后半段突然消失 | `ef-shut` 只写了 `to`，起点被当作 `none`，无法插值 | 补 `ef-shut-panel`，`from` 用 `inset(-6px)` |
 
 ### 7.4 测试工具（本机环境）
 
@@ -359,6 +371,8 @@ npm run preview   # http://localhost:4173
 - [ ] 提示条：开着搜索/成就弹窗时触发成就解锁，提示条压在弹窗之上，且不挡点击。
 - [ ] 成就：首次、阅读、读完、深度、略读、404、000、Konami、连点、静音、深夜/清晨。
 - [ ] 减弱动效：换页转场 0 次、页面仍可导航；滚动横幅变可横滚。
+- [ ] 弹窗关闭有 180ms 收起动画；Esc 走同一路径；减少动效时立即关闭。
+- [ ] 页面滚动条是自绘的；开关弹窗时三色条宽度与 dialog 位置完全不变。
 - [ ] 控制台零报错、无 hydration 警告。
 
 本轮实测基线：目录 56px 恒定；返回滚动 800→800；四档 `scrollWidth==clientWidth`；`footer bottom==docH`；`vue-tsc` 与构建通过。
@@ -375,7 +389,6 @@ npm run preview   # http://localhost:4173
 - 提示条压过弹窗依赖 Popover API（Chrome 114+ / Safari 17+）；不支持时退化为普通 fixed 元素，会被 `<dialog>` 盖住。
 - 隐藏页 `/colophon/` 仍是公开 URL，只是 `noindex` + 不在列表；真正保密需要服务端鉴权。
 - sitemap 默认 `http://localhost:4173`，部署必须传 `SITE_URL`。
-- 旧版 `endfield-blog/` 未同步修复；若不再需要，可归档到 `legacy-static/` 后从工作区移除。
 - 没有 OG/Twitter 卡片、canonical；SEO 目前只有 title/description/noindex/sitemap。
 - 成就与主题存在 localStorage；换域名/端口会丢进度，清站点数据也会丢。
 - `content/site.json` 的 `updated` 是手动维护；忘记改会导致日期类信息滞后。
@@ -403,5 +416,5 @@ npm run preview   # http://localhost:4173
 - [ ] 知道三色条 fixed + `--tri-wipe`、目录 sticky 与栏边距同值。
 - [ ] 知道弹窗 id、`ScrollArea`、`modal-open`/`--sbw` 的约束。
 - [ ] 知道弹窗页脚 `.dialog-foot` 与手机高度，知道提示条靠 Popover 进 top layer（不是 `z-index`）。
-- [ ] 知道旧版位置与“未同步”的事实。
+- [ ] 知道旧静态版已移除、备份在哪，不要再去找 `../endfield-blog/`。
 - [ ] 改完按第 9 节清单回归，并更新 `screenshots/`。

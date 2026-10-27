@@ -1,6 +1,6 @@
 # RHINE 笔记 · Vue 3 静态博客
 
-原 `endfield-blog/` 纯 HTML 版本的 Vue 3 + Vite 重构。维护、踩坑与交接细节见 [HANDOVER.md](./HANDOVER.md)。视觉与交互按原站 1:1 迁移，`src/styles/endfield.css` 保持套件原样。
+界面按 [`endfield-ui`](https://github.com/hhikr/endfield-ui-skill)（终末地风格 UI 套件）搭成：`src/styles/endfield.css` 是该套件的原样副本，项目自己的版式写在 `src/styles/site.css`。维护、踩坑与交接细节见 [HANDOVER.md](./HANDOVER.md)。
 
 ## 开发与构建
 
@@ -23,18 +23,25 @@ content/
 src/
   views/            # 首页 / 列表 / 文章 / 关于 / 404 / 隐藏档案
   components/
-    shell/          # 左栏导航、页脚
+    shell/          # 左栏导航、页脚、页面滚动条
     home/           # 首页部件（线稿、字标区）
-    ui/             # 记录行、自绘滚动条、搜索面板、成就面板、提示条
-  composables/      # 主题、音效、成就、阅读进度、滚动锁、乱码
+    ui/             # 记录行、弹窗内滚动条、搜索面板、成就面板、提示条
+  composables/      # 主题、音效、成就、阅读进度、滚动锁、乱码、弹窗关闭
   styles/           # endfield.css（套件，不改）+ site.css（版式）
   router.ts         # 路由与滚动行为
   page-transition.ts # 路由切换的斜切快门（View Transition）
 scripts/
   content-plugin.ts # 构建期解析 Markdown → virtual:blog
   postbuild.mjs     # 404、旧地址跳转、sitemap、robots
-  migrate-content.mjs # 一次性：旧站 content.mjs → Markdown
 ```
+
+## 设计系统
+
+界面来自 [`endfield-ui`](https://github.com/hhikr/endfield-ui-skill) —— 终末地风格 UI 套件（仓库 <https://github.com/hhikr/endfield-ui-skill>，本地装在 `~/.workbuddy/skills/endfield-ui`）。
+
+- `src/styles/endfield.css` 是该技能 `assets/endfield.css` 的**原样副本**，当第三方代码对待；改版式一律写 `src/styles/site.css`。
+- 变体：`accent=yellow / paper=warm / cut=standard / ground=contours / density=standard / motion=full`，落点是 `<html data-ef-paper="warm">` 与 `<body class="ef ef-contours">`。
+- 拉丁字用 Saira 可变字体（SIL OFL 1.1），随仓库分发在 `src/assets/fonts/`。
 
 ## 内容写法
 
@@ -96,15 +103,16 @@ SITE_URL=https://your-domain.com npm run build
 - **换页**：用 `document.startViewTransition` 包住路由切换，复用 `endfield.css` 的斜切快门（360ms）；同路径筛选、锚点、`prefers-reduced-motion` 下自动跳过。
 - **顶部三色条**：固定在视口顶部、不占布局；滚动 0–72px 内从右向左擦除，侧栏不再被顶 3px。
 - **文章目录**：粘性起点与页边距同值（`clamp(2rem,5vw,3.5rem)`），滚动时完全不动；单栏（≤959px）下改为静态。
-- **弹窗**：搜索与成就共用 `.dialog-foot`，右下角统一「关闭」；手机上搜索面板限高 `62dvh`、成就 `74dvh`，不再顶满整屏。
+- **弹窗**：搜索与成就共用 `.dialog-foot`，右下角统一「关闭」；手机上搜索面板限高 `62dvh`、成就 `74dvh`，不再顶满整屏。关闭时挂 `.is-closing` 跑 180ms 收起动画（`useDialogClose` 负责等动画播完再 `close()`，Esc 也走同一条路）。
+- **滚动条**：页面与弹窗内的列表都用自绘的 8px 方头条，原生条已彻底移除（连占位），开关弹窗不会改变视口宽度。
 - **提示条**：`popover="manual"` 进 top layer，弹窗打开后会重新入栈，所以成就提示始终压在弹窗之上。
 - **路由**：统一带尾斜杠（`/articles/`、`/post/006/`），旧 `.html` 地址生成跳转桩。
 
-## 与纯 HTML 版的差异
+## 本地状态
 
-- 不再支持双击 `file://` 打开：产物是 ES module + 带 hash 的资源，需要静态服务器。
-- 站内跳转改为 SPA 路由，主题切换保留圆形揭幕（`startViewTransition`）。
-- 成就、音效、主题、阅读进度仍在浏览器本地，键名沿用 `rhine.v1` / `rhine.sound` / `theme`。
+- 成就、音效、主题、阅读进度都存在浏览器 localStorage，键名 `rhine.v1` / `rhine.sound` / `theme`。
+- 产物是 ES module + 带 hash 的资源，**不能双击 `file://` 打开**，需要静态服务器。
+- 页面滚动条是自绘的（`PageScrollbar.vue`），原生条在 `site.css` 里用 `scrollbar-width: none` 彻底移除 —— 连占位一起去掉，否则开关弹窗时会因视口变宽而横跳。
 
 ## 校验
 
