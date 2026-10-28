@@ -3,6 +3,7 @@ import { secret } from 'virtual:blog'
 import HomeView from '@/views/HomeView.vue'
 import ArticlesView from '@/views/ArticlesView.vue'
 import ArticleView from '@/views/ArticleView.vue'
+import ArchiveView from '@/views/ArchiveView.vue'
 import AboutView from '@/views/AboutView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 
@@ -10,6 +11,7 @@ export const routes: RouteRecordRaw[] = [
   { path: '/', name: 'home', component: HomeView },
   { path: '/articles/', name: 'articles', component: ArticlesView },
   { path: '/post/:no/', name: 'post', component: ArticleView },
+  { path: '/archive/', name: 'archive', component: ArchiveView },
   { path: '/about/', name: 'about', component: AboutView },
   // 隐藏档案：URL 来自 secret 文章的 slug（000-colophon → /colophon/），与 SSG 路由同源
   { path: `/${secret.slug}/`, name: 'colophon', component: ArticleView },

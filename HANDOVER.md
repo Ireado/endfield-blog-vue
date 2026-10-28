@@ -1,13 +1,13 @@
 # HANDOVER · RHINE 笔记（Vue 3 静态博客）
 
-更新：2026-10-27（旧静态版移除 / 弹窗关闭动画 / 页面自绘滚动条）· 版本：`endfield-blog-vue/`
+更新：2026-10-28（归档页 / 标签体系 / 上一篇·下一篇 / 分享卡片；仓库远端信息 / 截图验收经验）· 版本：`endfield-blog-vue/`
 
 ---
 
 ## 0. 先看这 9 条
 
 1. **站点只有一个目录：`endfield-blog-vue/`**。旧的纯 HTML 版已于 2026-10-27 移除，别再去找 `../endfield-blog/`（唯一备份是 `../.workbuddy/archive/endfield-blog-legacy-2026-10-27.tar.gz`，不在本仓库里）。
-2. 构建是 **SSG**：`npm run build` 生成 12 个 prerender 页面 + `404.html` + 旧地址跳转桩 + sitemap/robots。产物在 `dist/`。
+2. 构建是 **SSG**：`npm run build` 生成 13 个 prerender 页面 + `404.html` + 旧地址跳转桩 + sitemap/robots + 分享卡片。产物在 `dist/`。
 3. 站点**不能双击 `file://` 打开**：ES module + 带 hash 的资源，必须用静态服务器。`npm run preview` 后访问 **`http://localhost:4173`**（本机 vite preview 只监听 `::1`，`127.0.0.1` 会 502）。
 4. 视觉规则来自 [`endfield-ui`](https://github.com/hhikr/endfield-ui-skill) 技能（仓库 <https://github.com/hhikr/endfield-ui-skill>）：**浅色纸面、墨线、唯一黄色只做填充**。不要把这里改回黑底霓虹/HUD。
 5. 换页的斜切快门不在 CSS 里自动生效，靠 `src/page-transition.ts` 手动 `startViewTransition`。
@@ -26,10 +26,10 @@
 | 设计套件 | [endfield-ui](https://github.com/hhikr/endfield-ui-skill) | 终末地风格 UI 套件，仓库 <https://github.com/hhikr/endfield-ui-skill>，本地装在 `~/.workbuddy/skills/endfield-ui`；`src/styles/endfield.css` 是其 `assets/endfield.css` 的原样副本 |
 | 截图 | `endfield-blog-vue/screenshots/` | 本地留档、不进仓库（已 gitignore）。13 张：浅/深、列表、文章、关于、404、搜索/成就（桌面 + 手机）、提示条压弹窗、移动端 |
 
-**规模**：`dist/` 约 1.2 MB（含字体 81 KB）；`node_modules/` 约 113 MB。
+**规模**：`dist/` 约 767 KB（含字体 81 KB、固定 OG 图 36 KB）；`node_modules/` 约 113 MB。
 **当前没有常驻预览服务**：按第 2 节命令自行启动。
 **后端**：无。无统计脚本、无 Cookie、无第三方请求。状态全部在浏览器 localStorage。
-**版本控制**：本目录就是仓库根（`git init -b main`），直接在 `endfield-blog-vue/` 里执行 git 命令即可；`screenshots/` 与 `node_modules/`、`dist/` 均在 `.gitignore` 里，不进仓库。旧静态版不在本仓库历史中。
+**版本控制**：本目录就是仓库根（`git init -b main`），远端 <https://github.com/Ireado/endfield-blog-vue>（public，HTTPS，本机 credential.helper=`manager`，推送直接弹浏览器授权）；直接在 `endfield-blog-vue/` 里执行 git 命令即可；`screenshots/` 与 `node_modules/`、`dist/` 均在 `.gitignore` 里，不进仓库。旧静态版不在本仓库历史中。**放弃未提交的改动用 `git stash push -u` 留底，不要 `reset --hard` 直接丢**——当前 stash@{0} 存着 2026-10-28 放弃的「RSS + 首页导览」方案，确认不要了再 drop。
 
 ---
 
@@ -74,17 +74,18 @@ endfield-blog-vue/
 │  ├─ App.vue                 # 骨架、路由钩子、三色条擦除、滚动锁、快捷键、音效
 │  ├─ router.ts               # 路由 + scrollBehavior
 │  ├─ page-transition.ts      # 换页斜切快门（startViewTransition）
-│  ├─ views/                  # Home / Articles / Article / About / NotFound
+│  ├─ views/                  # Home / Articles / Article / Archive / About / NotFound
 │  ├─ components/
 │  │  ├─ shell/               # RailNav、SiteFooter、PageScrollbar（页面自绘滚动条）
 │  │  ├─ home/ArtFrame.vue    # 工作台俯视线稿（内联 SVG）
 │  │  └─ ui/                  # RecordRow、ScrollArea、SearchPalette、AchievementDialog、ToastHost
-│  ├─ composables/            # theme / sound / achievements / reading / scroll lock / scramble / toast / ui / dialogClose
+│  ├─ composables/            # theme / sound / achievements / reading / scroll lock / scramble / toast / ui / dialogClose / og
 │  ├─ styles/{endfield.css, site.css, site/, contours/}
 │  │  # site.css 是 @import 入口（顺序=层叠顺序）；site/ 按模块拆分：
 │  │  # base 全局地基 / scrollbar 页面滚动条 / shell 骨架·左栏·页脚 /
-│  │  # home 首页 / articles 列表 / post 文章页 / pages 关于·404 / overlays 浮层
+│  │  # home 首页 / articles 列表 / post 文章页 / archive 归档 / tags 标签 / pages 关于·404 / overlays 浮层
 │  └─ assets/fonts/           # Saira.woff2（81 KB）+ OFL（ttf 回退已移除）
+├─ public/                    # favicon、variant.js、og-default.png（分享卡片，全站共用一张）
 └─ screenshots/
 ```
 
@@ -261,6 +262,35 @@ secret: false
 - `PageScrollbar` 固定在右侧 8px，视觉同 `ScrollArea`（纸色轨道 + 1px 线 + 墨色滑块）；支持拖动滑块与点轨道跳转，`ResizeObserver` 盯 body 高度。
 - 不可滚动时不出 `is-on`；`html.modal-open` 时 CSS 收起；`@media (pointer: coarse)` 整条 `display: none`。
 
+### 6.14 上一篇 / 下一篇（`ArticleView.vue`）
+
+- 文章底部 `.post-nav` 两栏：左「上一篇」（更早）、右「下一篇」（更晚）。顺序取 `posts` 的**日期升序**（content-plugin 里已排好），不要按编号或文件名排序。
+- 首篇的左格、末篇的右格渲染空占位 `.post-nav-void`，保持两栏位置不塌；`≤719px` 竖排，`下一篇` 改左对齐。
+- 编号行 `margin-top:auto` 贴底：标题一行/两行不等时，两栏的编号仍然对齐在同一条线上。
+- 隐藏档案（`/colophon/`）不参与这条链，底部保留原来的「接着读」两篇记录。
+
+### 6.15 归档页（`/archive/`，`ArchiveView.vue`）
+
+- 数据直接来自 `virtual:blog` 的 `posts`（日期升序），在 `computed` 里按月分组：**月份倒序、月内日期倒序**；SSG 时执行一次，产物就是静态 HTML，没有前端计算。
+- 统计口径（全部真实，禁止手填）：总篇数/总字数取 `stats`；跨度 = 首篇 → 最近篇的天数（+1）；平均每篇 = 总字数 ÷ 篇数；「有更新的月份」= `stats.months` 里 `count > 0` 的个数。
+- 分类横条宽度 = 该分类篇数 ÷ 最大分类篇数，**墨色实条**（不是强调黄）；时间线 = 左侧 1px 竖线 + 每月一个 5px 方块节点。样式在 `site/archive.css`。
+- 新增页面要同步四处：`router.ts`、`vite.config.ts` 的 `includedRoutes`、`RailNav` 与 `SearchPalette` 的页面列表、`postbuild.mjs` 的 sitemap。归档页已全部接好。
+
+### 6.16 分享卡片（`useOg` + `public/og-default.png`）
+
+- 逐页变化的字段：各 view 调 `useOg({ title, desc, type })`，注入 `og:type / og:title / og:description` 与 `twitter:title / twitter:description`；文章页传 `type: 'article'`。
+- 全站不变的字段写在 `index.html`：`og:site_name`、`og:image`、`twitter:card`、`twitter:image`。**不要在 useHead 里再设 og:image**，否则和静态标签重复，爬虫可能取到前一个。
+- `og:image` 是**一张固定的 1200×630 PNG**（`public/og-default.png`），不按文章生成：构建管线保持零浏览器依赖。改图要重新生成（方法见 7.4 最后一行），改文案后也要重拍。
+- `postbuild.mjs` 负责两件事：把 `content="/og-default.png"` 换成 `${origin}/og-default.png`；给每个真实页面（跳过 `404/`）插入 `<link rel="canonical" href="${origin}${url}">`。`SITE_URL` 不传时 origin 是 `http://localhost:4173`。
+
+### 6.17 标签体系（列表页标签云 + `?tag=` 筛选）
+
+- 数据：`content-plugin.ts` 构建期统计 `stats.tags`（`{ name, count }[]`，只算公开文章；按篇数降序、同数按名称排序）。一篇可带多个标签，所以各标签篇数之和大于文章数（当前 19 个标签 / 21 次标注 / 平均 3.0）。
+- 界面只在**文章列表页**：分类 chips 一行，下面一条 1px 线，再下面是全部标签的芯片云（`.tag-cloud`）。两组隔开只靠这条线，**不加小字组标题**；文章页摘要下的标签行也点进列表页筛选，前面同样不加「标签」小字。
+- 选中态用 `.ef-chip[aria-pressed='true']`（黄底）。**再点同一枚就是取消**——所以没有「清除」按钮，也没有「当前标签」提示行。
+- 筛选走查询参数 `/articles/?tag=xxx`（中文 URL 编码）；分类与标签可叠加，切一个时保留另一个。
+- **不给标签建静态路由**：原来的 `/tags/` 独立页已于 2026-10-28 并入列表页（每加一个标签多一页 SSG 不值得）。主导航仍 4 项：首页 / 文章 / 归档 / 关于。
+
 ---
 
 ## 7. 踩坑清单（按主题）
@@ -320,8 +350,12 @@ secret: false
 | 键盘事件没反应 | `window.dispatchEvent` 不会到达 `document` 监听；dispatch 到 `document.body` 或用真实 `press` |
 | 截图里 toast / 转场看不到 | 截图会快进 CSS 动画；用 `getAnimations()` 或时间序列判断，不要靠截图判在途动画 |
 | 判断“关闭按钮是否在屏内”不能靠截图 | 缩放预览里 1–2px 的出界肉眼看不出来；用 `getBoundingClientRect().bottom` 对比 `innerHeight`，面板高度对比 `innerHeight × 比例` |
-| `playwright-cli` 不在 PATH，或报“Executable doesn't exist … chromium-1247” | 本机没装 CLI；`~/.workbuddy/binaries/node/workspace` 里的 playwright 要 1247，本机缓存只有 1228。直接用 workspace 的 playwright + `chromium.launch({ channel: 'chrome' })` 走系统 Chrome；ESM 不认 `NODE_PATH`，用 `createRequire('…/workspace/package.json')` 引包 |
+| `playwright-cli` 不在 PATH，或报“Executable doesn't exist … chromium-1247” | 本机没装 CLI；`~/.workbuddy/binaries/node/workspace` 里的 playwright 要 1247，本机缓存只有 1228。直接用 workspace 的 playwright + `chromium.launch({ channel: … })` 走系统浏览器（`'chrome'` / `'msedge'` 均可，2026-10-28 实测 Edge 可用）；ESM 不认 `NODE_PATH`，用 `createRequire('…/workspace/package.json')` 引包 |
+| playwright 自带 chromium 缺失（chrome-headless-shell 没装），又不想下 150MB | 本机缓存不配套 | 同上：`channel: 'msedge'` 或 `'chrome'` 走系统浏览器，零下载 |
 | `playwright-cli open file://…` 被拒绝 | 用本地服务器 |
+| 在 `dist/` 里放临时 html 截图，访问却渲染成 404 | sirv 的 SPA fallback 优先级高于静态文件 | 不要放临时页。要注入脚本（如滚动到指定位置）再截图：备份 `dist/index.html` → 注入 `window.scrollTo(...)` → 截图 → `cp` 还原，最后确认无残留 |
+| 想裁剪/拼接截图，但 pip 装不了 pillow | 沙箱无网，装包失败 | 放弃裁图，改用「注入滚动脚本 + 视口截图」直接截目标区域 |
+| Edge 的 `--headless --screenshot` 不落盘 | 命令行截图参数在本机不生效（exit 0 但没文件，换参数/临时 profile 都不行） | 用 workspace 的 playwright + `channel: 'msedge'`，`page.screenshot({ path })`；OG 图（1200×630）就是这么生成的 |
 | `vite preview` 的 `127.0.0.1` 502 | 它只监听 `::1`，用 `localhost:4173` |
 | 后台服务器随命令结束消失 | 需要常驻时用宿主后台任务；测试可临时起、用完 kill |
 
@@ -341,7 +375,12 @@ secret: false
 | --- | --- |
 | 文章/摘要/标签 | `content/posts/*.md`，然后 `npm run build` |
 | 站名/更新日期 | `content/site.json`（`updated` 会影响页脚、sitemap、第 N 天） |
-| 新增页面 | `src/views/*.vue` + `src/router.ts` + `vite.config.ts` 的 `includedRoutes`（SSG 必须列出来） |
+| 新增页面 | `src/views/*.vue` + `src/router.ts` + `vite.config.ts` 的 `includedRoutes`（SSG 必须列出来）+ 左栏与搜索面板的页面列表 + postbuild 的 sitemap |
+| 归档页统计/分组 | `src/views/ArchiveView.vue`；数据全部来自 `virtual:blog`，不要手填数字 |
+| 上一篇/下一篇顺序 | 由 `posts` 的日期排序决定（content-plugin 的 `all.sort`）；不要在 `ArticleView` 里写死编号 |
+| 分享卡片文案 | 各 view 的 `useOg(...)`；全站不变的（og:site_name / og:image / twitter:card）在 `index.html` |
+| 分享卡片图片 | 覆盖 `public/og-default.png`（1200×630）；生成方法见 7.4 最后一行，改完文案要重拍 |
+| 标签 / 分类 | 只改文章 frontmatter 的 `tags` / `category`；列表页的标签云与文章页标签行自动跟随，**不要另外维护标签清单，也不要建标签页** |
 | 新增成就 | `src/composables/useAchievements.ts` 的 `ACHIEVEMENTS` + 对应触发点；满贯逻辑基于总数 |
 | 换页动画时长/形状 | `src/styles/endfield.css` 的 `ef-shutter`（360ms）；不要动 `page-transition.ts` 的等待逻辑，除非重新验证 timeout |
 | 三色条擦除距离 | `src/App.vue` 的 `scrollY / 72`；`--tri-wipe` 由它驱动 |
@@ -364,7 +403,12 @@ npm run build
 npm run preview   # http://localhost:4173
 ```
 
-- [ ] `dist/` 有 12 个 `index.html`（首页、articles、about、404、colophon、post/001–007）。
+- [ ] `dist/` 有 13 个 `index.html`（首页、articles、archive、about、404、colophon、post/001–007），`dist/og-default.png` 存在。
+- [ ] 列表页有 19 枚标签芯片与 `stats.tags` 一致；`/articles/?tag=交互` 得到 2 篇且只有该芯片是选中态；再点一次取消；分类 + 标签可叠加。
+- [ ] 归档页的篇数/字数/跨度/分类计数与文章数据一致；月份分组倒序、月内倒序；分类横条长度与篇数成正比。
+- [ ] 文章页底部有上一篇/下一篇（首篇只有右格、末篇只有左格）；`/colophon/` 仍是「接着读」。
+- [ ] 每个真实页面有 `<meta property="og:title">`、绝对地址的 `og:image`、`<link rel="canonical">`；`404` 没有 canonical。
+- [ ] 分享卡片检查：`og:image` 指向 `${origin}/og-default.png`，图片为 1200×630。
 - [ ] `dist/404.html`、`dist/articles.html`、`dist/post/006.html` 等跳转桩存在；`sitemap.xml`、`robots.txt` 存在。
 - [ ] 1440 / 1024 / 768 / 390 四档：无横向溢出；`footer bottom == 文档高度`；左栏 `top = 0`。
 - [ ] 1440 文章页：目录 top 在 0/40/400px 滚动位置都是 56px；≤959px 为 static。
@@ -379,7 +423,7 @@ npm run preview   # http://localhost:4173
 - [ ] 页面滚动条是自绘的；开关弹窗时三色条宽度与 dialog 位置完全不变。
 - [ ] 控制台零报错、无 hydration 警告。
 
-本轮实测基线：目录 56px 恒定；返回滚动 800→800；四档 `scrollWidth==clientWidth`；`footer bottom==docH`；`vue-tsc` 与构建通过。
+本轮实测基线：13 页构建通过；归档页 7 篇 / 3,277 字 / 164 天跨度 / 5 个有更新月份，与文章数据一致；标签 19 枚 / 21 次标注 / 平均 3.0，`?tag=交互` 2 篇；1440/768/390 三档 `scrollWidth==clientWidth`；文章页导航两栏编号对齐；目录 56px 恒定；返回滚动 800→800；`footer bottom==docH`；`vue-tsc` 与构建通过。
 弹窗基线（1440 / 390）：桌面搜索面板 `[448,87,544,726]`，关闭按钮 `bottom=791`、`right=972`（面板右沿 992）；手机搜索面板 `[16,160,358,523]`（523 ≈ 62dvh）、按钮 `bottom=662`（屏高 844）；手机成就面板 `[16,110,358,625]`（≈74dvh）、按钮 `bottom=717`；弹窗开着时 `:popover-open=true`，提示条文字「成就 No.11 · 键盘用户」压在面板之上。
 
 ---
@@ -392,8 +436,8 @@ npm run preview   # http://localhost:4173
 - 换页快门依赖 View Transition API：Safari/Firefox 不支持时自动退化为普通跳转（无动画）。
 - 提示条压过弹窗依赖 Popover API（Chrome 114+ / Safari 17+）；不支持时退化为普通 fixed 元素，会被 `<dialog>` 盖住。
 - 隐藏页 `/colophon/` 仍是公开 URL，只是 `noindex` + 不在列表；真正保密需要服务端鉴权。
-- sitemap 默认 `http://localhost:4173`，部署必须传 `SITE_URL`。
-- 没有 OG/Twitter 卡片、canonical；SEO 目前只有 title/description/noindex/sitemap。
+- **OG 图是全站共用的一张静态 PNG**，不含文章标题；要做逐篇图的构建期渲染（浏览器截图 / 图片库）目前刻意不做，因为会把浏览器或原生依赖带进构建管线。
+- sitemap、canonical、og:image 的绝对地址都取自 `SITE_URL`，部署必须传。
 - 成就与主题存在 localStorage；换域名/端口会丢进度，清站点数据也会丢。
 - `content/site.json` 的 `updated` 是手动维护；忘记改会导致日期类信息滞后。
 
@@ -401,7 +445,9 @@ npm run preview   # http://localhost:4173
 
 ## 11. 部署
 
-1. `SITE_URL=https://你的域名 npm run build`
+源码已托管在 GitHub（仓库见第 1 节），**GitHub Pages 未启用**：若将来用项目页（`https://用户名.github.io/仓库名/`），不只是设 `base` 一行——`scripts/postbuild.mjs` 的旧地址跳转与 sitemap 也硬编码了 `/articles/` 等绝对路径，需要一并处理。
+
+1. `SITE_URL=https://你的域名 npm run build`（sitemap、canonical、og:image 的绝对地址都取它）
 2. 上传 `dist/` 到静态托管（GitHub Pages / Netlify / Cloudflare Pages / 对象存储均可）。
 3. 托管需支持**目录索引**：`/articles/` → `articles/index.html`；`/post/006/` → `post/006/index.html`。
 4. 404 使用根目录 `404.html`（已生成）。
@@ -420,5 +466,7 @@ npm run preview   # http://localhost:4173
 - [ ] 知道三色条 fixed + `--tri-wipe`、目录 sticky 与栏边距同值。
 - [ ] 知道弹窗 id、`ScrollArea`、`modal-open`/`--sbw` 的约束。
 - [ ] 知道弹窗页脚 `.dialog-foot` 与手机高度，知道提示条靠 Popover 进 top layer（不是 `z-index`）。
+- [ ] 知道归档页数据来自 `posts`、文章导航按日期顺序、OG 图是固定一张（`public/og-default.png`）。
+- [ ] 知道标签只写在 frontmatter、筛选走 `/articles/?tag=`，不给标签建静态路由。
 - [ ] 知道旧静态版已移除、备份在哪，不要再去找 `../endfield-blog/`。
 - [ ] 改完按第 9 节清单回归，并更新 `screenshots/`。

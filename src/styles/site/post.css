@@ -97,6 +97,60 @@
   color: var(--ef-ink-2);
 }
 
+/* ---------- 上一篇 / 下一篇 ---------- */
+.post-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 2.5rem 0 0;
+  border: 1px solid var(--ef-rule);
+  background: var(--ef-rule); /* 1px 缝隙透出来就是分隔线 */
+}
+.post-nav-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-height: 6.5rem;
+  padding: 0.9rem 1rem;
+  background: var(--ef-panel);
+  transition: background-color 0.15s;
+}
+.post-nav-item:is(:hover, :focus-visible) {
+  background: var(--ef-paper);
+}
+.post-nav-item .dir {
+  color: var(--ef-ink-2);
+}
+.post-nav-item .nv-title {
+  font-weight: 700;
+  line-height: 1.5;
+}
+.post-nav-item .nv-no {
+  margin-top: auto; /* 标题行数不同时，编号在两栏底部对齐 */
+  padding-top: 0.2rem;
+  color: var(--ef-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.post-nav-item.is-end {
+  text-align: right;
+  align-items: flex-end;
+}
+.post-nav-void {
+  background: var(--ef-panel);
+}
+@media (max-width: 719px) {
+  .post-nav {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .post-nav-item {
+    min-height: 0;
+  }
+  .post-nav-item.is-end {
+    text-align: left;
+    align-items: flex-start;
+  }
+}
+
 /* ---------- 侧栏目录 ---------- */
 .toc-wrap {
   position: sticky;

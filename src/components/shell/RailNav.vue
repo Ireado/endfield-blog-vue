@@ -39,6 +39,7 @@ function onSound() {
     <div class="rail-links">
       <RouterLink to="/" :aria-current="current('/') ? 'page' : undefined">首页</RouterLink>
       <RouterLink to="/articles/" :aria-current="articlesActive ? 'page' : undefined">文章</RouterLink>
+      <RouterLink to="/archive/" :aria-current="current('/archive') ? 'page' : undefined">归档</RouterLink>
       <RouterLink to="/about/" :aria-current="current('/about') ? 'page' : undefined">关于</RouterLink>
     </div>
     <div class="rail-tools">

@@ -22,6 +22,7 @@ interface Row {
 const pages: Row[] = [
   { no: '', title: '首页', cat: '页面', to: '/' },
   { no: '', title: '文章', cat: '页面', to: '/articles/' },
+  { no: '', title: '归档', cat: '页面', to: '/archive/' },
   { no: '', title: '关于', cat: '页面', to: '/about/' },
 ]
 

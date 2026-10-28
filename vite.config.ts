@@ -14,6 +14,6 @@ export default defineConfig({
   },
   ssgOptions: {
     dirStyle: 'nested',
-    includedRoutes: () => ['/', '/articles/', '/about/', '/404/', secretRoute, ...postRoutes],
+    includedRoutes: () => ['/', '/articles/', '/archive/', '/about/', '/404/', secretRoute, ...postRoutes],
   },
 } as UserConfig & { ssgOptions: ViteSSGOptions })

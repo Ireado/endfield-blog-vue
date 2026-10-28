@@ -31,6 +31,7 @@ export interface Stats {
   count: number
   totalChars: number
   cats: { name: string; count: number }[]
+  tags: { name: string; count: number }[]
   months: { label: string; count: number }[]
   days: number
   first: string

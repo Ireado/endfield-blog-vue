@@ -45,7 +45,7 @@ redirect('about.html', '/about/')
 for (const no of posts) redirect(`post/${no}.html`, `/post/${no}/`)
 
 // sitemap
-const urls = ['/', '/articles/', '/about/', ...posts.map((no) => `/post/${no}/`)]
+const urls = ['/', '/articles/', '/archive/', '/about/', ...posts.map((no) => `/post/${no}/`)]
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url><loc>${origin}${u}</loc><lastmod>${site.updated}</lastmod></url>`).join('\n')}
@@ -54,4 +54,26 @@ ${urls.map((u) => `  <url><loc>${origin}${u}</loc><lastmod>${site.updated}</last
 writeFileSync(path.join(DIST, 'sitemap.xml'), xml, 'utf8')
 writeFileSync(path.join(DIST, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`, 'utf8')
 
-console.log(`✓ postbuild: 404.html / ${posts.length} 个旧地址跳转 / sitemap / robots`)
+// 分享卡片与 canonical：og:image 必须是绝对地址（社交爬虫不认相对路径）；
+// canonical 逐页生成，跳过 404（noindex 页不需要）。
+const walk = (dir) =>
+  readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const full = path.join(dir, e.name)
+    return e.isDirectory() ? walk(full) : [full]
+  })
+let canon = 0
+for (const file of walk(DIST)) {
+  if (path.basename(file) !== 'index.html') continue
+  const rel = path.relative(DIST, path.dirname(file)).split(path.sep).join('/')
+  if (rel === '404') continue
+  const url = rel ? `/${rel}/` : '/'
+  let html = readFileSync(file, 'utf8')
+  html = html.replaceAll('content="/og-default.png"', `content="${origin}/og-default.png"`)
+  if (!html.includes('rel="canonical"')) {
+    html = html.replace('</head>', `  <link rel="canonical" href="${origin}${url}">\n</head>`)
+    canon += 1
+  }
+  writeFileSync(file, html)
+}
+
+console.log(`✓ postbuild: 404.html / ${posts.length} 个旧地址跳转 / sitemap / robots / og:image 绝对化 / canonical × ${canon}`)

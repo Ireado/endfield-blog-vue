@@ -7,12 +7,18 @@ import { useAchievements } from '@/composables/useAchievements'
 import { scramble, vScramble } from '@/composables/useScramble'
 import { tone } from '@/composables/useSound'
 import { fmtDate, fmtNum } from '@/utils/format'
+import { useOg } from '@/composables/useOg'
 import ArtFrame from '@/components/home/ArtFrame.vue'
 import RecordRow from '@/components/ui/RecordRow.vue'
 
 useHead({
   title: 'RHINE 笔记 · 一个人的设计与工程笔记',
   meta: [{ name: 'description', content: '界面、前端、渲染与声音的工作笔记。按发布顺序编号。' }],
+})
+
+useOg({
+  title: 'RHINE 笔记 · 一个人的设计与工程笔记',
+  desc: '界面、前端、渲染与声音的工作笔记。按发布顺序编号。',
 })
 
 const ach = useAchievements()

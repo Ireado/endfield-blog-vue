@@ -1,0 +1,89 @@
+/* archive.css — 归档页：统计数字、分类横条、年月时间线 */
+
+.arc-figs {
+  margin: 1.8rem 0 0;
+}
+.arc-ledger {
+  max-width: var(--ef-measure);
+  margin: 1.1rem 0 0;
+}
+
+/* 分类分布：细横条，长度就是篇数（墨色线条，不用强调黄） */
+.arc-cats {
+  max-width: var(--ef-measure);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.arc-cats > li {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) 2rem;
+  gap: 0 0.9rem;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--ef-rule);
+}
+.arc-cats a {
+  border-bottom: 1px solid var(--ef-rule);
+}
+.arc-bar {
+  position: relative;
+  height: 7px;
+  background: var(--ef-chip);
+}
+.arc-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--w, 0) * 100%);
+  background: var(--ef-ink);
+}
+.arc-n {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 时间线：左侧竖线 + 方块节点，月份之间用留白分区 */
+.arc-timeline {
+  margin-top: 1.2rem;
+  padding-left: 1.15rem;
+  border-left: 1px solid var(--ef-rule);
+}
+.arc-month {
+  position: relative;
+  scroll-margin-top: 24px;
+}
+.arc-month + .arc-month {
+  margin-top: 1.9rem;
+}
+.arc-month::before {
+  content: '';
+  position: absolute;
+  left: -1.15rem;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  margin-left: -3px;
+  background: var(--ef-ink);
+}
+.arc-month h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin: 0 0 0.5rem;
+}
+.arc-month h3 time {
+  letter-spacing: 0.08em;
+}
+.arc-note {
+  margin: 1.5rem 0 0;
+  line-height: 1.8;
+}
+
+@media (max-width: 719px) {
+  .arc-cats > li {
+    grid-template-columns: 4.5rem minmax(0, 1fr) 1.6rem;
+    gap: 0 0.6rem;
+  }
+}

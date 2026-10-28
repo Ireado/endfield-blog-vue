@@ -1,8 +1,10 @@
 # RHINE 笔记 · Vue 3 静态博客
 
-界面按 [`endfield-ui`](https://github.com/hhikr/endfield-ui-skill)（终末地风格 UI 套件）搭成：`src/styles/endfield.css` 是该套件的原样副本，项目自己的版式写在 `src/styles/site.css`。维护、踩坑与交接细节见 [HANDOVER.md](./HANDOVER.md)。
+界面按 [`endfield-ui`](https://github.com/hhikr/endfield-ui-skill)（终末地风格 UI 套件）搭成：`src/styles/endfield.css` 是该套件的原样副本，项目自己的版式写在 `src/styles/site.css`。本文档面向日常使用与内容维护；机制内幕、踩坑清单与验证基线等交接细节见 [HANDOVER.md](./HANDOVER.md)。
 
 ## 开发与构建
+
+要求 Node ≥ 20.19（或 ≥ 22.12，Vite 7 的底线；本机以 Node 22 LTS 开发）。
 
 ```bash
 npm install
@@ -21,18 +23,20 @@ content/
   posts/*.md        # 文章正文 + frontmatter（000 为隐藏档案）
   site.json         # 站名、上线日、更新日
 src/
-  views/            # 首页 / 列表 / 文章 / 关于 / 404 / 隐藏档案
+  views/            # 首页 / 列表 / 文章 / 归档 / 关于 / 404 / 隐藏档案
   components/
     shell/          # 左栏导航、页脚、页面滚动条
     home/           # 首页部件（线稿、字标区）
     ui/             # 记录行、弹窗内滚动条、搜索面板、成就面板、提示条
-  composables/      # 主题、音效、成就、阅读进度、滚动锁、乱码、弹窗关闭
+  composables/      # 主题、音效、成就、阅读进度、滚动锁、乱码、弹窗关闭、分享卡片
   styles/           # endfield.css（套件，不改）+ site.css（入口）+ site/（版式分模块）
   router.ts         # 路由与滚动行为
   page-transition.ts # 路由切换的斜切快门（View Transition）
 scripts/
   content-plugin.ts # 构建期解析 Markdown → virtual:blog
-  postbuild.mjs     # 404、旧地址跳转、sitemap、robots
+  postbuild.mjs     # 404、旧地址跳转、sitemap、robots、canonical、og:image 绝对化
+public/
+  og-default.png    # 分享卡片（1200×630，全站共用一张）
 ```
 
 ## 设计系统
@@ -79,6 +83,7 @@ secret: false
 | `/` | `dist/index.html` | 首页 |
 | `/articles/` | `dist/articles/index.html` | 支持 `?cat=前端` |
 | `/post/006/` | `dist/post/006/index.html` | 文章 |
+| `/archive/` | `dist/archive/index.html` | 归档：按年月分组 + 全站统计 |
 | `/about/` | `dist/about/index.html` | 关于 |
 | `/colophon/` | `dist/colophon/index.html` | 隐藏档案（noindex） |
 | 其它 | `dist/404.html` | 静态托管的 404 |
@@ -90,7 +95,7 @@ secret: false
 构建产物是纯静态目录，可直接放到任意静态托管。
 
 - **子路径部署**：在 `vite.config.ts` 里设置 `base: '/repo/'`，并把 `index.html` 里的资源路径交给 Vite 处理即可。
-- **sitemap 域名**：默认使用 `http://localhost:4173`，部署时通过环境变量生成正确地址：
+- **sitemap 域名**：默认使用 `http://localhost:4173`，部署时通过环境变量生成正确地址（sitemap、canonical、og:image 的绝对地址都取它）：
 
 ```bash
 SITE_URL=https://your-domain.com npm run build
@@ -107,6 +112,11 @@ SITE_URL=https://your-domain.com npm run build
 - **滚动条**：页面与弹窗内的列表都用自绘的 8px 方头条，原生条已彻底移除（连占位），开关弹窗不会改变视口宽度。
 - **提示条**：`popover="manual"` 进 top layer，弹窗打开后会重新入栈，所以成就提示始终压在弹窗之上。
 - **路由**：统一带尾斜杠（`/articles/`、`/post/006/`），旧 `.html` 地址生成跳转桩。
+- **文章导航**：每篇底部有「上一篇 / 下一篇」，按发布日期线性推进；手机竖排，首末篇只显示一侧。隐藏档案页保留「接着读」。
+- **归档页**：按年月分组（月倒序、月内倒序），总字数、跨度、分类横条全部构建期计算，没有手填数字。
+- **标签**：文章列表页的分类下面是一整片标签芯片云，点一枚筛选、再点取消，选中态是黄底；也可直接用 `/articles/?tag=标签`，与分类可叠加。标签只写在文章 frontmatter 里，统计与界面自动跟随，没有独立的标签页。
+- **分享卡片**：每页带 `og:title` / `og:description` / 绝对地址的 `og:image` 与 `canonical`；图片是全站共用的一张 `og-default.png`（1200×630）。
+- **浏览器**：面向现代浏览器——换页快门依赖 View Transition API、提示条压弹窗依赖 Popover API（Chrome/Edge 114+、Safari 17+ 完整体验）；不支持的浏览器自动降级（无动画跳转、提示条退化为普通 fixed），功能不受影响。
 
 ## 本地状态
 
@@ -116,6 +126,7 @@ SITE_URL=https://your-domain.com npm run build
 
 ## 校验
 
-- `npm run build` 生成 12 个页面；`dist/404.html`、`sitemap.xml`、`robots.txt`、7 个旧地址跳转。
-- 浅色/深色、390/768/1024/1440 四档宽度走查通过；控制台无报错、无 hydration 警告。
+- `npm run build` 生成 13 个页面（含归档）；`dist/404.html`、`sitemap.xml`、`robots.txt`、`og-default.png`、7 个旧地址跳转。
+- 浅色/深色、390/768/1024/1440 四档宽度走查通过；无横向溢出；控制台无报错、无 hydration 警告。
+- 每个真实页面都有 `og:*` 与 `canonical`，地址取自 `SITE_URL`（默认 `http://localhost:4173`）。
 - 截图见 `screenshots/`：桌面 1440×900、手机 390×844；弹窗与提示条层级的样张为 `palette.png`、`achievements.png`、`mobile-palette.png`、`mobile-achievements.png`、`toast-over-dialog.png`。

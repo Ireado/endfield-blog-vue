@@ -3,11 +3,14 @@ import { RouterLink } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { site, stats } from 'virtual:blog'
 import { fmtDate, fmtNum } from '@/utils/format'
+import { useOg } from '@/composables/useOg'
 
 useHead({
   title: '关于 · RHINE 笔记',
   meta: [{ name: 'description', content: '关于这个站和写字的人。' }],
 })
+
+useOg({ title: '关于 · RHINE 笔记', desc: '关于这个站和写字的人。' })
 
 function go(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })

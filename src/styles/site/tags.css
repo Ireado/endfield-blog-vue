@@ -1,0 +1,25 @@
+/* tags.css — 列表页的标签云与文章页的标签行 */
+
+/* 标签云：与分类 chips 并列的第二组筛选器，选中态由 .ef-chip[aria-pressed] 负责。
+   两组之间只用一条 1px 线分区，不加小字标题。 */
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  padding: 0.9rem 0 0;
+  list-style: none;
+  border-top: 1px solid var(--ef-rule);
+}
+.tag-cloud .n {
+  color: var(--ef-ink-2);
+}
+
+/* 文章页：摘要下的标签 */
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin: 0.9rem 0 0;
+}

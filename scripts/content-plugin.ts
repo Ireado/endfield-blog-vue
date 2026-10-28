@@ -105,6 +105,10 @@ function loadBlog(): BlogData {
   const catMap = new Map<string, number>()
   for (const p of posts) catMap.set(p.category, (catMap.get(p.category) || 0) + 1)
 
+  /* 标签统计：只算公开文章，一篇可带多个标签，所以各标签篇数之和会大于文章数 */
+  const tagMap = new Map<string, number>()
+  for (const p of posts) for (const t of p.tags) tagMap.set(t, (tagMap.get(t) || 0) + 1)
+
   const months: { label: string; count: number }[] = []
   if (posts.length) {
     const first = posts[0].date.slice(0, 7)
@@ -132,6 +136,9 @@ function loadBlog(): BlogData {
       count: posts.length,
       totalChars,
       cats: [...catMap.entries()].map(([name, count]) => ({ name, count })),
+      tags: [...tagMap.entries()]
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'zh')),
       months,
       days,
       first: posts[0]?.date || '',

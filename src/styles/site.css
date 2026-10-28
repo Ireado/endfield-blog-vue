@@ -4,7 +4,7 @@
 
    本文件是入口：@import 顺序就是层叠顺序，与拆分前的单文件一致。
    各节找对应文件：base 全局地基 / scrollbar 页面滚动条 / shell 骨架·左栏·页脚 /
-   home 首页 / articles 文章列表 / post 文章页 / pages 关于·404 / overlays 浮层弹窗
+   home 首页 / articles 文章列表 / post 文章页 / archive 归档 / tags 标签 / pages 关于·404 / overlays 浮层弹窗
    ========================================================================== */
 
 @import './site/base.css';
@@ -13,5 +13,7 @@
 @import './site/home.css';
 @import './site/articles.css';
 @import './site/post.css';
+@import './site/archive.css';
+@import './site/tags.css';
 @import './site/pages.css';
 @import './site/overlays.css';
