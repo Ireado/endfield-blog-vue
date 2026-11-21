@@ -8,6 +8,9 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const DIST = path.join(ROOT, 'dist')
 const site = JSON.parse(readFileSync(path.join(ROOT, 'content/site.json'), 'utf8'))
 const origin = (process.env.SITE_URL || 'http://localhost:4173').replace(/\/$/, '')
+if (!process.env.SITE_URL) {
+  console.warn('! 未设置 SITE_URL：canonical / sitemap / og:image 会写成 http://localhost:4173')
+}
 // 与 content-plugin 同一条分流规则：frontmatter secret:true 的文章是独立页面（colophon），
 // 不进 sitemap、也不需要旧地址跳转。这里不要按编号写特判。
 const posts = readdirSync(path.join(ROOT, 'content/posts'))

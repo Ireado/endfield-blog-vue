@@ -460,6 +460,20 @@ npm run preview   # http://localhost:4173
 5. 若部署在子路径（`https://host/repo/`），在 `vite.config.ts` 设 `base: '/repo/'` 并重建；同时把 `SITE_URL` 写成完整子路径。
 6. 不需要 SPA rewrite：每个路由都有真实 HTML；未知路径由 `404.html` 接管。
 
+### Cloudflare Workers（当前 CI 走这条）
+
+仓库已接 Cloudflare Workers Builds：克隆仓库 → `npm run build` → `npx wrangler deploy`。
+`wrangler.jsonc` 已提交，只把 `dist` 当静态资源上传（没有 `main`，不挂 Worker 脚本）：
+`html_handling: auto-trailing-slash` + `not_found_handling: 404-page`，与上面第 3、4 条一致。
+
+- **不要**按 Cloudflare 的自动初始化提示装 `@cloudflare/vite-plugin`：它要往 `vite.config.ts`
+  注入插件，而本项目 config 带 `as UserConfig & { ssgOptions }` 断言，注入会报
+  `Cannot modify Vite config: could not extract a config object (found TSAsExpression)`
+  并让整个 deploy 失败。
+- 构建变量里加 `SITE_URL=https://实际域名`，否则 canonical / sitemap / og:image 全是
+  `http://localhost:4173`（现在构建日志会 warn 提醒）。
+- 本地部署：`npm run deploy`（先 build 再 `wrangler deploy`；本机没装 wrangler 时走 npx）。
+
 ---
 
 ## 12. 交接检查表

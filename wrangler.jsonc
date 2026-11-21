@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "endfield-blog-vue",
+  "compatibility_date": "2026-11-19",
+  "observability": {
+    "enabled": true
+  },
+  // 纯静态站点（vite-ssg 预渲染），不含 Worker 脚本：没有 main 字段，
+  // 只把 dist 作为静态资源上传。因此**不要**再装 @cloudflare/vite-plugin
+  // （它要给 vite.config.ts 注入插件，而本项目的 config 带 as 断言，注入必失败）。
+  "assets": {
+    "directory": "./dist",
+    // /post/001 → /post/001/ → post/001/index.html，与本地 preview 行为一致
+    "html_handling": "auto-trailing-slash",
+    // 每个路由都有真实 HTML，未知路径必须是真 404（404.html，状态码 404）。
+    // 不要改成 single-page-application：那会拿首页顶替并返回 200，等于软 404。
+    "not_found_handling": "404-page"
+  }
+}
