@@ -1,7 +1,10 @@
 /* overlays.css — 浮层：成就弹窗、搜索面板、通用 dialog/滚动区、关闭动画、toast */
 
 /* ---------- 通用 dialog 结构 ---------- */
-.ef-dialog.wide {
+/* 两个模态浮层共用同一宽度：它们会互相顶替着出现（开搜索会先撤掉成就），
+   宽度差 2rem 就成了两套版式。只在这里定义一次，别在两处各写一个数。 */
+.ef-dialog.wide,
+.ef-dialog.palette {
   width: min(36rem, calc(100% - 2rem));
 }
 #ach-dialog > .ef-panel,
@@ -155,9 +158,7 @@
 }
 
 /* ---------- 搜索面板 ---------- */
-.ef-dialog.palette {
-  width: min(34rem, calc(100% - 2rem));
-}
+/* 宽度同成就弹窗，见上面「通用 dialog 结构」 */
 .palette .ef-search {
   margin: 0.85rem 0 0.6rem;
   flex: none;

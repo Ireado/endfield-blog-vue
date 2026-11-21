@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { posts } from 'virtual:blog'
 import ScrollArea from './ScrollArea.vue'
-import { paletteOpen } from '@/composables/useUi'
+import { paletteOpen, registerLayer } from '@/composables/useUi'
 import { useDialogClose } from '@/composables/useDialogClose'
 
 const dlg = ref<HTMLDialogElement | null>(null)
 const input = ref<HTMLInputElement | null>(null)
 const palList = ref<HTMLOListElement | null>(null)
 const q = ref('')
-const { close: closeDialog, cancel: cancelClose } = useDialogClose()
+const { close: closeDialog, cancel: cancelClose, closeNow } = useDialogClose()
+
+/* 打开成就弹窗时由 useUi 调用，不留退出动画，避免两层 <dialog> 叠着 */
+onMounted(() => registerLayer('palette', () => closeNow(dlg.value)))
+onBeforeUnmount(() => registerLayer('palette', null))
 
 interface Row {
   no: string

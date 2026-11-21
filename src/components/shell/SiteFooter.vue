@@ -8,7 +8,7 @@ import { fmtDate } from '@/utils/format'
   <footer class="site-foot">
     <p class="ef-field">RHINE 笔记 · 更新于 {{ fmtDate(site.updated) }} · 共 {{ stats.count }} 篇</p>
     <p class="ef-field">
-      Saira · SIL OFL 1.1 · 无统计脚本 ·
+      Saira · SIL OFL 1.1 · 无统计 · 无 Cookie · 无账号 ·
       <RouterLink class="secret-no" :to="`/${secret.slug}/`" :aria-label="`隐藏档案 No.${secret.no}`">No.{{ secret.no }}</RouterLink>
     </p>
   </footer>

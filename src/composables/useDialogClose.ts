@@ -39,5 +39,22 @@ export function useDialogClose() {
     }, CLOSE_MS)
   }
 
-  return { close, cancel }
+  /**
+   * 立刻关，不播退出动画。
+   *
+   * 只用于「被另一个浮层顶掉」：退出动画是给用户主动关闭看的，
+   * 换成新窗时再播 180ms，旧窗就会和新窗叠在一起 —— <dialog> 一旦 showModal
+   * 就进 top layer，两个同时开着是两层实打实的面板，不是变暗的遮罩。
+   */
+  function closeNow(el: HTMLDialogElement | null) {
+    if (timer) {
+      clearTimeout(timer)
+      timer = null
+    }
+    if (!el?.open) return
+    el.classList.remove('is-closing')
+    el.close()
+  }
+
+  return { close, cancel, closeNow }
 }

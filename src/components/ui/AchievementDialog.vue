@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ScrollArea from './ScrollArea.vue'
-import { achOpen } from '@/composables/useUi'
+import { achOpen, registerLayer } from '@/composables/useUi'
 import { useDialogClose } from '@/composables/useDialogClose'
 import { ACHIEVEMENTS, useAchievements } from '@/composables/useAchievements'
 
 const { count, total, has } = useAchievements()
 const dlg = ref<HTMLDialogElement | null>(null)
-const { close: closeDialog, cancel: cancelClose } = useDialogClose()
+const { close: closeDialog, cancel: cancelClose, closeNow } = useDialogClose()
+
+/* 打开搜索面板时由 useUi 调用，不留退出动画，避免两层 <dialog> 叠着 */
+onMounted(() => registerLayer('ach', () => closeNow(dlg.value)))
+onBeforeUnmount(() => registerLayer('ach', null))
 
 watch(achOpen, (open) => {
   if (open) {
